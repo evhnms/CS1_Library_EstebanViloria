@@ -10,7 +10,6 @@ public class Library {
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        // Elimina la creación duplicada de scanner
         Person person = new Student(123, "Juan", "Pérez", "Estudiante");
         materials.add(new Material("MT12345", "Mago de Hoz", new Date(), 1));
         
