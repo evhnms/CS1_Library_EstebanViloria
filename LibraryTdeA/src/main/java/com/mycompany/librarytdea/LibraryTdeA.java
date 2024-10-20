@@ -104,7 +104,7 @@ public class LibraryTdeA {
                         MaterialTdeA.addMaterial(idNumberAddExistences, addQuantityRegistered, materials);
                         break;
                     case 8:
-                        HistoryTdeA1.showHistory();
+                        HistoryTdeA.showHistory();
                         break;
                     case 9:
                         exit = true;
