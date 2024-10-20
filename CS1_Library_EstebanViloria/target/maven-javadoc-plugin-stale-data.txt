@@ -1,0 +1,42 @@
+-J-Duser.language=
+-J-Duser.country=
+@options
+@packages
+-encoding
+'UTF-8'
+-protected
+-source
+'22'
+-sourcepath
+'C:/Users/Lenovo/Documents/NetBeansProjects/CS1_Library_EstebanViloria/src/main/java;C:/Users/Lenovo/Documents/NetBeansProjects/CS1_Library_EstebanViloria/target/generated-sources/annotations'
+-author
+-bottom
+'Copyright &#169; 2024. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'C:/Users/Lenovo/Documents/NetBeansProjects/CS1_Library_EstebanViloria/target/reports/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'CS1_Library_EstebanViloria 1.0-SNAPSHOT API'
+-use
+-version
+-windowtitle
+'CS1_Library_EstebanViloria 1.0-SNAPSHOT API'
+com.mycompany.cs1_library_estebanviloria
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\src\main\java = 1729376228894
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\generated-sources\annotations = 1729376491307
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\allclasses-index.html = 1729379775506
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\allpackages-index.html = 1729379775513
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\element-list = 1729379775322
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\help-doc.html = 1729379775586
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\index-all.html = 1729379775565
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\index.html = 1729379775577
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\member-search-index.js = 1729379775529
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\module-search-index.js = 1729379775518
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\overview-tree.html = 1729379775476
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\package-search-index.js = 1729379775521
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\search.html = 1729379775573
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\tag-search-index.js = 1729379775533
+C:\Users\Lenovo\Documents\NetBeansProjects\CS1_Library_EstebanViloria\target\reports\apidocs\type-search-index.js = 1729379775524
