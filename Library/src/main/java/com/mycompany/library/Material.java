@@ -1,7 +1,8 @@
 package com.mycompany.library;
 
+import java.io.*;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 
 public class Material {
     private String idMaterial;
@@ -10,106 +11,142 @@ public class Material {
     private int quantityRegistered;
     private int quantityAvailable;
 
-    private static HashSet<String> idMaterials = new HashSet<>();
+    private static final String MATERIAL_FILE = "materiales.txt";
+    private static final String LOANS_FILE = "prestamos.txt";
+    private static final int MAX_RENEWALS = 3;
+    private static final HashMap<Integer, HashMap<String, Integer>> renewalRecords = new HashMap<>();
 
     public Material(String idMaterial, String title, Date dateOfRegistration, int quantityRegistered) {
-        this.idMaterial = idMaterial;
+        this.idMaterial = idMaterial.toUpperCase();
         this.title = title;
         this.dateOfRegistration = dateOfRegistration;
         this.quantityRegistered = quantityRegistered;
         this.quantityAvailable = quantityRegistered;
     }
 
-    public String getIdMaterial() {
-        return idMaterial;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public Date getDateOfRegistration() {
-        return dateOfRegistration;
-    }
-
-    public int getQuantityRegistered() {
-        return quantityRegistered;
-    }
-
-    public int getQuantityAvailable() {
-        return quantityAvailable;
+    public static boolean exists(String idMaterial) {
+        return searchInFile(MATERIAL_FILE, idMaterial) != null;
     }
 
     public static boolean createMaterial(String idMaterial, String title, Date dateOfRegistration, int quantityRegistered) {
-        if (idMaterials.contains(idMaterial) ||  idMaterials.equals(idMaterial)) {
-            System.out.println("Ya existe el material en la base de datos");
-            return false;
-        } else if (!idMaterial.matches("^[A-Z]{2}\\d{5}$") || idMaterial.length() <7) {
-            System.out.println("El código no cumple con los parámetros requeridos");
+        if (!idMaterial.matches("^[A-Z]{2}\\d{5}$")) {
+            System.out.println("Código no válido");
             return false;
         }
-        idMaterials.add(idMaterial.toUpperCase());
-        System.out.println("Se ha creado exitosamente el material:" + title);
-        return true;
+
+        if (exists(idMaterial)) {
+            System.out.println("Material ya registrado");
+            return false;
+        }
+
+        return writeToFile(MATERIAL_FILE, String.join(",", idMaterial.toUpperCase(), title, String.valueOf(dateOfRegistration.getTime()), 
+                String.valueOf(quantityRegistered), String.valueOf(quantityRegistered)), "Material creado: " + title);
     }
 
-    public static void borrow(String idMaterial, int idNumber, HashSet<Material> materials) {
-        for (Material material : materials) {
-            if (material.getIdMaterial().equals(idMaterial)); {
-                if (material.quantityAvailable > 0) {
-                    material.quantityAvailable--;
-                    Person.incrementBorrowedMaterials(idNumber);
-                    System.out.println("Material prestado a la cédula: " + idNumber);
-                } else {
-                    System.out.println("No hay materiales disponibles para prestar.");
+    public static void borrow(String idMaterial, int idNumber) {
+        String[] materialData = searchInFile(MATERIAL_FILE, idMaterial);
+        if (materialData != null && Integer.parseInt(materialData[4]) > 0) {
+            updateMaterialFile(idMaterial, -1);
+            writeToFile(LOANS_FILE, idNumber + "," + idMaterial, "Material prestado a: " + idNumber);
+        } else {
+            System.out.println(materialData == null ? "Material no encontrado." : "No disponible.");
+        }
+    }
+
+    public static void returnMaterial(String idMaterial, int idNumber) {
+        if (searchInFile(MATERIAL_FILE, idMaterial) != null) {
+            updateMaterialFile(idMaterial, 1);
+            removeLoanEntry(idMaterial, idNumber);
+        } else {
+            System.out.println("Material no encontrado.");
+        }
+    }
+
+    public static void renew(String idMaterial, int idNumber) {
+        renewalRecords.putIfAbsent(idNumber, new HashMap<>());
+        int currentRenewals = renewalRecords.get(idNumber).getOrDefault(idMaterial, 0);
+
+        if (currentRenewals < MAX_RENEWALS) {
+            renewalRecords.get(idNumber).put(idMaterial, currentRenewals + 1);
+            System.out.println("Material renovado para: " + idNumber);
+        } else {
+            System.out.println("Límite de renovaciones alcanzado.");
+        }
+    }
+
+    public static void addMaterial(String idMaterial, int addQuantity) {
+        if (searchInFile(MATERIAL_FILE, idMaterial) != null) {
+            updateMaterialFile(idMaterial, addQuantity);
+            System.out.println("Cantidad aumentada para: " + idMaterial);
+        } else {
+            System.out.println("Material no encontrado.");
+        }
+    }
+
+    private static String[] searchInFile(String fileName, String idMaterial) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            return reader.lines()
+                    .map(line -> line.split(","))
+                    .filter(data -> data[0].equalsIgnoreCase(idMaterial))
+                    .findFirst().orElse(null);
+        } catch (IOException e) {
+            System.out.println("Error de lectura: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static void updateMaterialFile(String idMaterial, int quantityChange) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(MATERIAL_FILE));
+             BufferedWriter writer = new BufferedWriter(new FileWriter("temp_materiales.txt"))) {
+
+            reader.lines().forEach(line -> {
+                String[] data = line.split(",");
+                if (data[0].equalsIgnoreCase(idMaterial)) {
+                    data[4] = String.valueOf(Integer.parseInt(data[4]) + quantityChange);
                 }
-                return;
-            }
-        }
-        System.out.println("El material con ID: " + idMaterial + " no existe.");
-    }
-
-    public static void returnMaterial(String idMaterial, int idNumber, HashSet<Material> materials) {
-        for (Material material : materials) {
-            if (material.getIdMaterial().equals(idMaterial)) {
-                if (Person.getBorrowedMaterialsCount(idNumber) > 0) {
-                    material.quantityAvailable++;
-                    Person.decrementBorrowedMaterials(idNumber);
-                    System.out.println("Material devuelto por la cédula: " + idNumber);
-                } else {
-                    System.out.println("No se puede devolver, la cédula " + idNumber + " no tiene materiales prestados.");
+                try {
+                    writer.write(String.join(",", data) + "\n");
+                } catch (IOException e) {
+                    System.out.println("Error al escribir: " + e.getMessage());
                 }
-                return;
-            }
+            });
+        } catch (IOException e) {
+            System.out.println("Error al actualizar archivo: " + e.getMessage());
         }
-        System.out.println("El material con ID: " + idMaterial + " no existe.");
+        new File(MATERIAL_FILE).delete();
+        new File("temp_materiales.txt").renameTo(new File(MATERIAL_FILE));
     }
 
-    public static void renew(String idMaterial, int idNumber, HashSet<Material> materials) {
-        for (Material material : materials) {
-            if (material.getIdMaterial().equals(idMaterial)) {
-                if (Person.getBorrowedMaterialsCount(idNumber) > 0) {
-                    Person.incrementRenewalCount(idNumber);
-                    System.out.println("Material renovado por la cédula: " + idNumber);
-                } else {
-                    System.out.println("No se puede renovar, la cédula " + idNumber + " no tiene materiales prestados.");
+    private static boolean writeToFile(String fileName, String content, String successMessage) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            writer.write(content);
+            writer.newLine();
+            System.out.println(successMessage);
+            return true;
+        } catch (IOException e) {
+            System.out.println("Error al guardar: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static void removeLoanEntry(String idMaterial, int idNumber) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(LOANS_FILE));
+             BufferedWriter writer = new BufferedWriter(new FileWriter("temp_prestamos.txt"))) {
+
+            reader.lines().forEach(line -> {
+                String[] data = line.split(",");
+                if (!(Integer.parseInt(data[0]) == idNumber && data[1].equalsIgnoreCase(idMaterial))) {
+                    try {
+                        writer.write(line + "\n");
+                    } catch (IOException e) {
+                        System.out.println("Error al escribir: " + e.getMessage());
+                    }
                 }
-                return;
-            }
+            });
+        } catch (IOException e) {
+            System.out.println("Error al eliminar préstamo: " + e.getMessage());
         }
-        System.out.println("El material con ID: " + idMaterial + " no existe.");
-    }
-
-    public static void addMaterial(String idMaterial, int addQuantityRegistered, HashSet<Material> materials) {
-        for (Material material : materials) {
-            if (material.getIdMaterial().equals(idMaterial)) {
-                material.quantityRegistered += addQuantityRegistered;
-                material.quantityAvailable += addQuantityRegistered;
-                System.out.println("Se ha aumentado la cantidad registrada de: " + material.getTitle());
-                System.out.println("Cantidad registrada actual: " + material.quantityRegistered);
-                return;
-            }
-        }
-        System.out.println("El material con ID: " + idMaterial + " no existe.");
+        new File(LOANS_FILE).delete();
+        new File("temp_prestamos.txt").renameTo(new File(LOANS_FILE));
     }
 }
